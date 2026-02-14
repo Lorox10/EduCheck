@@ -5,14 +5,15 @@ from pathlib import Path
 from datetime import datetime
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 from config import Settings
 from db import db_healthcheck, get_session, init_db
 from importer import import_students
-from models import UploadLog
+from models import Student, UploadLog
+from qr import ensure_qr, render_qr_with_name
 from sqlalchemy import select, desc
 
 
@@ -51,6 +52,37 @@ def create_app() -> Flask:
             "attachment; filename=estudiantes_template.csv"
         )
         return response
+
+    @app.get("/students/<int:student_id>/qr")
+    def download_student_qr(student_id: int):
+        settings = Settings()
+        settings.qr_dir.mkdir(parents=True, exist_ok=True)
+
+        with get_session() as session:
+            student = session.scalar(
+                select(Student).where(Student.id == student_id)
+            )
+            if student is None:
+                return {"error": "Estudiante no encontrado"}, 404
+
+            if not student.qr_path:
+                student.qr_path = ensure_qr(settings.qr_dir, student.documento)
+
+            qr_path = Path(student.qr_path)
+            if not qr_path.exists():
+                student.qr_path = ensure_qr(settings.qr_dir, student.documento)
+                qr_path = Path(student.qr_path)
+
+            full_name = f"{student.apellidos} {student.nombres}".strip()
+            image_stream = render_qr_with_name(qr_path, full_name)
+
+        filename = f"qr_{student_id}.png"
+        return send_file(
+            image_stream,
+            mimetype="image/png",
+            as_attachment=True,
+            download_name=filename,
+        )
 
     @app.post("/students/import")
     def import_students_from_csv() -> tuple[dict, int]:

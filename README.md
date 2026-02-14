@@ -161,6 +161,11 @@ Historial de cargas:
 - Endpoint: `GET /uploads/history`
 - Devuelve lista de archivos cargados con fecha y grados.
 
+Descarga de QR individual:
+
+- Endpoint: `GET /students/{id}/qr`
+- Devuelve una imagen PNG con el QR y el nombre completo debajo.
+
 ### Frontend
 
 Las instrucciones se agregaran cuando se inicialice el proyecto Angular.
