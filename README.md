@@ -78,6 +78,35 @@ Incluye: Flask, Flask-CORS, python-dotenv, SQLAlchemy, mysql-connector, APSchedu
 - Copiar `.env.example` a `.env`
 - Editar `.env` con tus credenciales
 
+### Ejecutar en Visual Studio Code (backend)
+
+1. Verifica que MySQL este corriendo.
+2. Crea la base de datos si no existe:
+
+```sql
+CREATE DATABASE edu_check CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+```
+
+3. En VS Code, abre una terminal en la carpeta del proyecto.
+4. Activa el entorno virtual:
+
+- Windows: `venv\Scripts\activate`
+- Linux/Mac: `source venv/bin/activate`
+
+5. Ejecuta el servidor:
+
+```bash
+python Backend/app.py
+```
+
+6. Prueba el estado:
+
+```bash
+curl http://127.0.0.1:5000/health
+```
+
+Debe responder: `{"status":"ok","db":"ok"}`.
+
 ### Frontend
 
 Las instrucciones se agregaran cuando se inicialice el proyecto Angular.
