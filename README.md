@@ -40,9 +40,14 @@ Edu Check/
 
 ## Requisitos
 
+Instala lo siguiente para que todo funcione en tu maquina:
+
 - Python 3.10 o superior
+- MySQL 8 (servidor)
+- MySQL Workbench (opcional, para crear y administrar la base)
+- Git
+- Visual Studio Code
 - Node.js 18 o superior (cuando se inicialice el frontend)
-- MySQL 8
 
 ## Instalacion
 
