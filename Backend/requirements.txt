@@ -1,0 +1,20 @@
+# Framework Web
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# Base de Datos
+mysql-connector-python==8.2.0
+SQLAlchemy==2.0.25
+
+# Variables de entorno
+python-dotenv==1.0.0
+
+# Validación de datos
+marshmallow==3.20.1
+
+# Tareas programadas
+APScheduler==3.10.4
+
+# Utilidades
+python-dateutil==2.8.2
+pytz==2024.1
