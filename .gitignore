@@ -35,3 +35,6 @@ coverage/
 # Logs
 *.log
 logs/
+
+# Generated QR images
+Backend/qr_codes/

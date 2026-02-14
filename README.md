@@ -112,6 +112,49 @@ curl http://127.0.0.1:5000/health
 
 Debe responder: `{"status":"ok","db":"ok"}`.
 
+### Formato CSV oficial
+
+Descarga el formato desde: `GET /students/template`
+
+Ejemplo de descarga en Windows (PowerShell):
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5000/students/template -OutFile estudiantes_template.csv
+```
+
+Columnas (separadas por coma):
+
+- numero
+- apellidos
+- nombres
+- tipo_documento (TI o CC)
+- documento
+- correo
+- grado (solo numero, ej: 10)
+
+Regla de importacion:
+
+- Si el `documento` ya existe, se actualiza el estudiante.
+- Si no existe, se crea.
+- El QR se genera en el backend si no existe para ese estudiante.
+
+Subir CSV (PowerShell):
+
+```powershell
+Invoke-WebRequest -Method Post -Uri http://127.0.0.1:5000/students/import -Form @{file=Get-Item .\estudiantes.csv}
+```
+
+Respuesta esperada:
+
+```json
+{
+    "creados": 0,
+    "actualizados": 0,
+    "omitidos": 0,
+    "errores": []
+}
+```
+
 ### Frontend
 
 Las instrucciones se agregaran cuando se inicialice el proyecto Angular.
