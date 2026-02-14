@@ -137,6 +137,7 @@ Regla de importacion:
 - Si el `documento` ya existe, se actualiza el estudiante.
 - Si no existe, se crea.
 - El QR se genera en el backend si no existe para ese estudiante.
+- El CSV subido se guarda en `Backend/uploads` y se registra en el historial.
 
 Subir CSV (PowerShell):
 
@@ -154,6 +155,11 @@ Respuesta esperada:
     "errores": []
 }
 ```
+
+Historial de cargas:
+
+- Endpoint: `GET /uploads/history`
+- Devuelve lista de archivos cargados con fecha y grados.
 
 ### Frontend
 

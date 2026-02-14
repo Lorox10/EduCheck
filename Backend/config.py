@@ -19,6 +19,7 @@ class Settings:
     db_user: str = ""
     db_password: str = ""
     qr_dir: Path = Path()
+    uploads_dir: Path = Path()
     app_env: str = ""
     app_port: str = ""
     secret_key: str = ""
@@ -33,6 +34,11 @@ class Settings:
             self,
             "qr_dir",
             Path(_get_env("QR_DIR", str(self.base_dir / "qr_codes"))),
+        )
+        object.__setattr__(
+            self,
+            "uploads_dir",
+            Path(_get_env("UPLOADS_DIR", str(self.base_dir / "uploads"))),
         )
         object.__setattr__(self, "app_env", _get_env("APP_ENV", "development"))
         object.__setattr__(self, "app_port", _get_env("APP_PORT", "5000"))

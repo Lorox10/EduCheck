@@ -56,6 +56,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 	created = 0
 	updated = 0
 	skipped = 0
+	grades_seen: set[int] = set()
 	errors: list[dict] = []
 
 	for idx, row in enumerate(reader, start=2):
@@ -73,6 +74,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 				continue
 
 			grade = _get_or_create_grade(session, grado)
+			grades_seen.add(grado)
 			student = session.scalar(
 				select(Student).where(Student.documento == documento)
 			)
@@ -109,4 +111,5 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 		"actualizados": updated,
 		"omitidos": skipped,
 		"errores": errors,
+		"grados": sorted(grades_seen),
 	}

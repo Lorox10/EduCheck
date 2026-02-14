@@ -2,14 +2,18 @@ import csv
 import io
 import os
 from pathlib import Path
+from datetime import datetime
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 
 from config import Settings
 from db import db_healthcheck, get_session, init_db
 from importer import import_students
+from models import UploadLog
+from sqlalchemy import select, desc
 
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
@@ -58,10 +62,52 @@ def create_app() -> Flask:
 
         settings = Settings()
         settings.qr_dir.mkdir(parents=True, exist_ok=True)
+        settings.uploads_dir.mkdir(parents=True, exist_ok=True)
+
+        safe_name = secure_filename(file.filename) or "estudiantes.csv"
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        stored_name = f"{timestamp}_{safe_name}"
+        stored_path = settings.uploads_dir / stored_name
+        file.save(stored_path)
 
         with get_session() as session:
-            result = import_students(file.stream, session, settings.qr_dir)
+            with open(stored_path, "rb") as stream:
+                result = import_students(stream, session, settings.qr_dir)
+            grades = result.get("grados", [])
+            grades_label = ",".join(str(g) for g in grades)
+            log = UploadLog(
+                filename=safe_name,
+                stored_path=str(stored_path),
+                grados=grades_label,
+                created_count=result.get("creados", 0),
+                updated_count=result.get("actualizados", 0),
+                skipped_count=result.get("omitidos", 0),
+                errors_count=len(result.get("errores", [])),
+            )
+            session.add(log)
         return result, 200
+
+    @app.get("/uploads/history")
+    def upload_history() -> tuple[dict, int]:
+        with get_session() as session:
+            logs = session.scalars(
+                select(UploadLog).order_by(desc(UploadLog.id))
+            ).all()
+            data = [
+                {
+                    "id": log.id,
+                    "archivo": log.filename,
+                    "ruta": log.stored_path,
+                    "grados": log.grados,
+                    "creados": log.created_count,
+                    "actualizados": log.updated_count,
+                    "omitidos": log.skipped_count,
+                    "errores": log.errors_count,
+                    "fecha": log.created_at.isoformat() if log.created_at else None,
+                }
+                for log in logs
+            ]
+        return {"historial": data}, 200
 
     return app
 

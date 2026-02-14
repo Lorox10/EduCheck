@@ -38,3 +38,6 @@ logs/
 
 # Generated QR images
 Backend/qr_codes/
+
+# Uploaded CSV files
+Backend/uploads/
