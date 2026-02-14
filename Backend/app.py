@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 
 from config import Settings
 from db import db_healthcheck, get_session, init_db
+from scheduler import start_scheduler
+from attendance import register_checkin
 from importer import import_students
 from models import Student, UploadLog
 from qr import ensure_qr, render_qr_with_name
@@ -25,6 +27,8 @@ def create_app() -> Flask:
     CORS(app)
 
     init_db()
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or os.environ.get("FLASK_RUN_FROM_CLI") != "true":
+        start_scheduler()
 
     @app.get("/health")
     def health() -> tuple[dict, int]:
@@ -141,6 +145,19 @@ def create_app() -> Flask:
                 for log in logs
             ]
         return {"historial": data}, 200
+
+    @app.post("/attendance/check-in")
+    def attendance_check_in() -> tuple[dict, int]:
+        payload = request.get_json(silent=True) or {}
+        documento = (payload.get("documento") or "").strip()
+        if not documento:
+            return {"error": "Documento requerido"}, 400
+
+        with get_session() as session:
+            result = register_checkin(session, documento)
+        if "error" in result:
+            return result, 404
+        return result, 200
 
     return app
 

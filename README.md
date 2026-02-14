@@ -112,6 +112,9 @@ curl http://127.0.0.1:5000/health
 
 Debe responder: `{"status":"ok","db":"ok"}`.
 
+Nota: El backend crea la base de datos y tablas automaticamente si no existen,
+y agrega columnas nuevas basicas cuando es necesario.
+
 ### Formato CSV oficial
 
 Descarga el formato desde: `GET /students/template`
@@ -166,6 +169,16 @@ Descarga de QR individual:
 
 - Endpoint: `GET /students/{id}/qr`
 - Devuelve una imagen PNG con el QR y el nombre completo debajo.
+
+Registro de asistencia:
+
+- Endpoint: `POST /attendance/check-in`
+- Body JSON: `{"documento":"1131110580"}`
+
+Notificaciones automaticas:
+
+- Se ejecutan a la hora configurada en `ALERT_TIME`.
+- Solo envian si el estudiante no tiene registro de entrada del dia.
 
 ### Frontend
 

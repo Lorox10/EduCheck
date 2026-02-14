@@ -23,6 +23,10 @@ class Settings:
     app_env: str = ""
     app_port: str = ""
     secret_key: str = ""
+    alert_time: str = ""
+    timezone: str = ""
+    whatsapp_token: str = ""
+    whatsapp_phone_id: str = ""
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "db_host", _get_env("DB_HOST", "127.0.0.1"))
@@ -43,3 +47,7 @@ class Settings:
         object.__setattr__(self, "app_env", _get_env("APP_ENV", "development"))
         object.__setattr__(self, "app_port", _get_env("APP_PORT", "5000"))
         object.__setattr__(self, "secret_key", _get_env("SECRET_KEY", "change-me"))
+        object.__setattr__(self, "alert_time", _get_env("ALERT_TIME", "07:10"))
+        object.__setattr__(self, "timezone", _get_env("TIMEZONE", "America/Bogota"))
+        object.__setattr__(self, "whatsapp_token", _get_env("WHATSAPP_TOKEN", ""))
+        object.__setattr__(self, "whatsapp_phone_id", _get_env("WHATSAPP_PHONE_ID", ""))
