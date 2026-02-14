@@ -5,6 +5,7 @@ Sistema de control de asistencia escolar con notificacion automatica a padres.
 ## Descripcion
 
 Edu Check es un sistema automatizado que permite a los colegios:
+
 - Registrar la asistencia de estudiantes mediante escaneo de carnets
 - Notificar automaticamente a los padres via WhatsApp cuando su hijo ingresa al colegio
 - Alertar a padres si el estudiante no registra entrada antes del inicio de clases
@@ -17,12 +18,14 @@ En desarrollo. Este repositorio contiene la estructura base y la configuracion i
 ## Tecnologias
 
 ### Backend
+
 - Python 3.x
 - Flask (framework web)
 - MySQL (base de datos)
 - SQLAlchemy (ORM)
 
 ### Frontend
+
 - Angular
 - Atomic Design (arquitectura de componentes)
 - Diseno responsive
@@ -46,25 +49,32 @@ Edu Check/
 ### Backend
 
 1. Navegar a la carpeta Backend:
+
 ```bash
 cd Backend
 ```
 
 2. Crear entorno virtual:
+
 ```bash
 python -m venv venv
 ```
 
 3. Activar entorno virtual:
+
 - Windows: `venv\Scripts\activate`
 - Linux/Mac: `source venv/bin/activate`
 
 4. Instalar dependencias:
+
 ```bash
 pip install -r requirements.txt
 ```
 
+Incluye: Flask, Flask-CORS, python-dotenv, SQLAlchemy, mysql-connector, APScheduler, marshmallow, python-dateutil y pytz.
+
 5. Configurar variables de entorno:
+
 - Copiar `.env.example` a `.env`
 - Editar `.env` con tus credenciales
 
