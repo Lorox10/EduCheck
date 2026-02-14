@@ -41,6 +41,7 @@ def create_app() -> Flask:
             "tipo_documento",
             "documento",
             "correo",
+            "telefono_acudiente",
             "grado",
         ]
         output = io.StringIO()

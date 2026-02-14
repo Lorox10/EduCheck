@@ -130,6 +130,7 @@ Columnas (separadas por coma):
 - tipo_documento (TI o CC)
 - documento
 - correo
+- telefono_acudiente (solo numeros, ej: 3001234567)
 - grado (solo numero, ej: 10)
 
 Regla de importacion:

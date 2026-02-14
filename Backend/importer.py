@@ -16,6 +16,7 @@ EXPECTED_HEADERS = [
 	"tipo_documento",
 	"documento",
 	"correo",
+	"telefono_acudiente",
 	"grado",
 ]
 
@@ -67,6 +68,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 			tipo_documento = _normalize_tipo((row.get("tipo_documento") or "").strip())
 			documento = (row.get("documento") or "").strip()
 			correo = (row.get("correo") or "").strip() or None
+			telefono = (row.get("telefono_acudiente") or "").strip() or None
 			grado = int((row.get("grado") or "").strip())
 
 			if not (apellidos and nombres and documento and tipo_documento):
@@ -87,6 +89,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 					tipo_documento=tipo_documento,
 					documento=documento,
 					correo=correo,
+					telefono_acudiente=telefono,
 					grade=grade,
 				)
 				session.add(student)
@@ -97,6 +100,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 				student.nombres = nombres
 				student.tipo_documento = tipo_documento
 				student.correo = correo
+				student.telefono_acudiente = telefono
 				student.grade = grade
 				updated += 1
 
