@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from config import Settings
 from models import Attendance, NotificationLog, Student
 from telegram import TelegramClient
+from messages import build_absence_message
 
 
 def _today_date(settings: Settings) -> datetime.date:
@@ -14,16 +15,14 @@ def _today_date(settings: Settings) -> datetime.date:
     return datetime.now(tz).date()
 
 
-def _build_message(student: Student) -> str:
-    full_name = f"{student.apellidos} {student.nombres}".strip()
-    return (
-        "Edu Check: Se reporta ausencia de "
-        f"{full_name} en el colegio el dia de hoy."
-    )
+def _get_alert_time(settings: Settings) -> str:
+    """Obtiene la hora configurada para alertas (ej: 07:10)"""
+    return settings.alert_time
 
 
 def send_absence_alerts(session: Session, settings: Settings) -> dict:
     today = _today_date(settings)
+    alert_time = _get_alert_time(settings)
 
     attended_ids = session.scalars(
         select(Attendance.student_id).where(Attendance.fecha == today)
@@ -51,9 +50,8 @@ def send_absence_alerts(session: Session, settings: Settings) -> dict:
             skipped += 1
             continue
 
-        status, error = client.send_text(
-            student.telegram_id, _build_message(student)
-        )
+        message = build_absence_message(student, alert_time)
+        status, error = client.send_text(student.telegram_id, message)
         log = NotificationLog(
             student_id=student.id,
             fecha=today,
