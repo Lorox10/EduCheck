@@ -157,13 +157,15 @@ Columnas (separadas por coma):
 - tipo_documento (TI o CC)
 - documento
 - correo
-- telefono_acudiente (solo numeros, ej: 3001234567)
+- telefono_acudiente (opcional, solo numeros, ej: 3001234567)
+- telegram_id (ID de Telegram del acudiente, obtenido con el bot, ej: 5936924064)
 - grado (solo numero, ej: 10)
 
 Regla de importacion:
 
 - Si el `documento` ya existe, se actualiza el estudiante.
 - Si no existe, se crea.
+- El `telegram_id` es mandatorio para recibir notificaciones.
 - El QR se genera en el backend si no existe para ese estudiante.
 - El CSV subido se guarda en `Backend/uploads` y se registra en el historial.
 

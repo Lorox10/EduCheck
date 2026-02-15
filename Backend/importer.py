@@ -17,6 +17,7 @@ EXPECTED_HEADERS = [
 	"documento",
 	"correo",
 	"telefono_acudiente",
+	"telegram_id",
 	"grado",
 ]
 
@@ -69,6 +70,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 			documento = (row.get("documento") or "").strip()
 			correo = (row.get("correo") or "").strip() or None
 			telefono = (row.get("telefono_acudiente") or "").strip() or None
+			telegram_id = (row.get("telegram_id") or "").strip() or None
 			grado = int((row.get("grado") or "").strip())
 
 			if not (apellidos and nombres and documento and tipo_documento):
@@ -89,7 +91,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 					tipo_documento=tipo_documento,
 					documento=documento,
 					correo=correo,
-					telefono_acudiente=telefono,
+					telegram_id=telegram_id,
 					grade=grade,
 				)
 				session.add(student)
@@ -100,6 +102,8 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 				student.nombres = nombres
 				student.tipo_documento = tipo_documento
 				student.correo = correo
+				student.telefono_acudiente = telefono
+				student.telegram_id = telegram_id
 				student.telefono_acudiente = telefono
 				student.grade = grade
 				updated += 1

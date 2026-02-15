@@ -29,6 +29,7 @@ class Student(Base):
     documento: Mapped[str] = mapped_column(String(32), nullable=False)
     correo: Mapped[str] = mapped_column(String(120), nullable=True)
     telefono_acudiente: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    telegram_id: Mapped[str | None] = mapped_column(String(20), nullable=True)
     qr_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     grade_id: Mapped[int] = mapped_column(ForeignKey("grades.id"), nullable=False)

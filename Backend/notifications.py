@@ -47,12 +47,12 @@ def send_absence_alerts(session: Session, settings: Settings) -> dict:
             continue
         if student.id in notified_set:
             continue
-        if not student.telefono_acudiente:
+        if not student.telegram_id:
             skipped += 1
             continue
 
         status, error = client.send_text(
-            student.telefono_acudiente, _build_message(student)
+            student.telegram_id, _build_message(student)
         )
         log = NotificationLog(
             student_id=student.id,

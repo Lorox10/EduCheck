@@ -46,6 +46,7 @@ def create_app() -> Flask:
             "documento",
             "correo",
             "telefono_acudiente",
+            "telegram_id",
             "grado",
         ]
         output = io.StringIO()
