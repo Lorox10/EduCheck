@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from typing import Iterator
 
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Engine
@@ -71,6 +72,14 @@ def _ensure_schema(engine: Engine) -> None:
                     "ADD COLUMN telefono_acudiente VARCHAR(20) NULL"
                 )
             )
+    if "telegram_id" not in columns:
+        with engine.connect() as connection:
+            connection.execute(
+                text(
+                    "ALTER TABLE students "
+                    "ADD COLUMN telegram_id VARCHAR(20) NULL"
+                )
+            )
 
 
 def db_healthcheck() -> str:
@@ -85,7 +94,7 @@ def db_healthcheck() -> str:
 
 
 @contextmanager
-def get_session() -> Session:
+def get_session() -> Iterator[Session]:
     if _engine is None:
         init_db()
     session = SessionLocal()

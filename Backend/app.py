@@ -27,6 +27,7 @@ def create_app() -> Flask:
     CORS(app)
 
     init_db()
+    settings = Settings()
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or os.environ.get("FLASK_RUN_FROM_CLI") != "true":
         start_scheduler()
 
@@ -159,6 +160,18 @@ def create_app() -> Flask:
         if "error" in result:
             return result, 404
         return result, 200
+
+    @app.post("/test/send-alerts")
+    def test_send_alerts() -> tuple[dict, int]:
+        """Endpoint de prueba para enviar notificaciones ahora (sin esperar 7:10 AM)"""
+        from notifications import send_absence_alerts
+        try:
+            with get_session() as session:
+                result = send_absence_alerts(session, settings)
+                session.commit()
+            return result, 200
+        except Exception as e:
+            return {"error": str(e)}, 500
 
     return app
 
