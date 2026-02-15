@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from config import Settings
 from models import Attendance, NotificationLog, Student
-from whatsapp import WhatsAppClient
+from telegram import TelegramClient
 
 
 def _today_date(settings: Settings) -> datetime.date:
@@ -36,7 +36,7 @@ def send_absence_alerts(session: Session, settings: Settings) -> dict:
     notified_set = set(notified_ids)
 
     students = session.scalars(select(Student)).all()
-    client = WhatsAppClient(settings)
+    client = TelegramClient(settings)
 
     sent = 0
     skipped = 0

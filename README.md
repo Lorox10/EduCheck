@@ -1,15 +1,16 @@
 # Edu Check
 
-Sistema de control de asistencia escolar con notificacion automatica a padres.
+Sistema de control de asistencia escolar con notificacion automatica a padres via Telegram.
 
 ## Descripcion
 
 Edu Check es un sistema automatizado que permite a los colegios:
 
 - Registrar la asistencia de estudiantes mediante escaneo de carnets
-- Notificar automaticamente a los padres via WhatsApp cuando su hijo ingresa al colegio
+- Notificar automaticamente a los padres via Telegram Bot cuando su hijo ingresa al colegio
 - Alertar a padres si el estudiante no registra entrada antes del inicio de clases
 - Generar reportes automaticos de estudiantes ausentes
+- Cargar listas de estudiantes mediante CSV
 
 ## Estado del proyecto
 
@@ -21,7 +22,9 @@ En desarrollo. Este repositorio contiene la estructura base y la configuracion i
 
 - Python 3.x
 - Flask (framework web)
-- MySQL (base de datos)
+- MySQL (base de d
+- APScheduler (tareas programadas)
+- Telegram Bot API (notificaciones)atos)
 - SQLAlchemy (ORM)
 
 ### Frontend
@@ -72,14 +75,35 @@ python -m venv venv
 
 4. Instalar dependencias:
 
-```bash
+````bash
 pip install -r requirements.txt
-```
+```, pytz, requests, qrcode, Pillow, pandas
 
 Incluye: Flask, Flask-CORS, python-dotenv, SQLAlchemy, mysql-connector, APScheduler, marshmallow, python-dateutil y pytz.
 
 5. Configurar variables de entorno:
+ (base de datos y Telegram Bot)
 
+#### Configuracion de Telegram Bot
+
+1. **Crear el bot en Telegram:**
+   - Abre Telegram y busca el usuario **@BotFather**
+   - Envía el comando `/newbot`
+   - Sigue los pasos y recibirás un **TOKEN**
+
+2. **Obtener tu CHAT_ID:**
+   - Inicia un chat con tu bot
+   - Envía cualquier mensaje
+   - Abre en el navegador: `https://api.telegram.org/bot<TU_TOKEN>/getUpdates`
+   - Busca el campo `"chat":{"id":123456789}` - ese número es tu **CHAT_ID**
+
+3. **Configurar variables en `.env`:**
+````
+
+TELEGRAM_TOKEN=tu_token_aqui
+TELEGRAM_CHAT_ID=tu_chat_id_aqui
+
+````
 - Copiar `.env.example` a `.env`
 - Editar `.env` con tus credenciales
 
@@ -90,7 +114,7 @@ Incluye: Flask, Flask-CORS, python-dotenv, SQLAlchemy, mysql-connector, APSchedu
 
 ```sql
 CREATE DATABASE edu_check CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-```
+````
 
 3. En VS Code, abre una terminal en la carpeta del proyecto.
 4. Activa el entorno virtual:
@@ -151,13 +175,25 @@ Invoke-WebRequest -Method Post -Uri http://127.0.0.1:5000/students/import -Form 
 
 Respuesta esperada:
 
-```json
+````json
 {
     "creados": 0,
-    "actualizados": 0,
-    "omitidos": 0,
-    "errores": []
-}
+    "actualizados": 0, via Telegram:
+
+- Se ejecutan a la hora configurada en `ALERT_TIME` (default: 07:10 AM).
+- Solo envian si el estudiante no tiene registro de entrada del dia.
+- Requiere `TELEGRAM_TOKEN` y `TELEGRAM_CHAT_ID` configurados en `.env`.
+- Las notificaciones se registran en la tabla `notification_logs` para auditoría.
+
+Configuracion:
+
+```env
+ALERT_TIME=07:10           # Hora del dia para alertas (formato HH:MM)
+TIMEZONE=America/Bogota    # Zona horaria (pytz compatible)
+TELEGRAM_TOKEN=xxx         # Token del Telegram Bot
+TELEGRAM_CHAT_ID=xxx       # Chat ID donde recibir notificaciones
+````
+
 ```
 
 Historial de cargas:
@@ -197,3 +233,4 @@ Proyecto desarrollado para la materia **Desarrollo Profesional de Soluciones Sof
 ## Licencia
 
 Este proyecto es de uso academico.
+```
