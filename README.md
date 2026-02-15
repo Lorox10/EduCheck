@@ -212,11 +212,59 @@ Registro de asistencia:
 
 - Endpoint: `POST /attendance/check-in`
 - Body JSON: `{"documento":"1131110580"}`
+- **Envía notificación inmediata** al acudiente cuando registra entrada (lectura de QR)
 
-Notificaciones automaticas:
+## Sistema de Notificaciones Mejorado
 
-- Se ejecutan a la hora configurada en `ALERT_TIME`.
-- Solo envian si el estudiante no tiene registro de entrada del dia.
+El sistema envía **2 tipos de notificaciones** a los acudientes:
+
+### 1️⃣ Notificación de Entrada (Inmediata)
+
+Se envía **cuando el estudiante registra entrada** (lee su QR):
+
+```
+✅ Edu Check - Entrada Registrada
+
+Carlos Martinez con cédula 1131110583 del grado 11 
+registró su entrada a las 07:45.
+```
+
+**Flujo:**
+- Estudiante escanea su QR al llegar al colegio
+- Sistema registra la entrada
+- **Acudiente recibe Telegram INMEDIATAMENTE**
+
+### 2️⃣ Notificación de Ausencia (Programada)
+
+Se envía **a la hora configurada** (default: 07:10 AM) si el estudiante NO registró entrada:
+
+```
+⚠️ Edu Check - Reporte de Ausencia
+
+Lucas García con cédula 1131110582 del grado 10 
+no ha registrado entrada hasta las 07:10.
+```
+
+**Flujo:**
+- Todos los días a las 07:10 AM (configurable)
+- Sistema revisa quién NO llegó
+- **Acudientes reciben Telegram de ausencia**
+
+### Personalizar Mensajes
+
+Los mensajes están en **Backend/messages.py**:
+
+```python
+def build_entry_message(student, hora: str) -> str:
+    # Mensaje cuando registra entrada
+    return f"✅ {student.apellidos} {student.nombres} con cédula {student.documento} ..."
+
+def build_absence_message(student, hora: str) -> str:
+    # Mensaje cuando NO registra entrada  
+    return f"⚠️ {student.apellidos} {student.nombres} con cédula {student.documento} ..."
+```
+
+Edita estas funciones para personalizar los mensajes que reciben los padres.
 
 ### Frontend
 
