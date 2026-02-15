@@ -11,8 +11,10 @@ from qr import ensure_qr
 
 EXPECTED_HEADERS = [
 	"numero",
-	"apellidos",
-	"nombres",
+	"primer_apellido",
+	"segundo_apellido",
+	"primer_nombre",
+	"segundo_nombre",
 	"tipo_documento",
 	"documento",
 	"correo",
@@ -44,7 +46,20 @@ def _get_or_create_grade(session: Session, numero: int) -> Grade:
 
 def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 	text_stream = TextIOWrapper(file_stream, encoding="utf-8-sig")
-	reader = csv.DictReader(text_stream)
+	
+	# Leer una muestra para detectar el delimitador
+	sample = text_stream.read(1024)
+	text_stream.seek(0)
+	
+	# Detectar delimitador automáticamente (coma o punto y coma)
+	try:
+		sniffer = csv.Sniffer()
+		delimiter = sniffer.sniff(sample).delimiter
+	except:
+		# Si falla la detección, usar punto y coma por defecto
+		delimiter = ';'
+	
+	reader = csv.DictReader(text_stream, delimiter=delimiter)
 
 	headers = reader.fieldnames or []
 	normalized = [_normalize_header(h) for h in headers]
@@ -64,8 +79,10 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 	for idx, row in enumerate(reader, start=2):
 		try:
 			numero = int((row.get("numero") or "").strip())
-			apellidos = (row.get("apellidos") or "").strip()
-			nombres = (row.get("nombres") or "").strip()
+			primer_apellido = (row.get("primer_apellido") or "").strip()
+			segundo_apellido = (row.get("segundo_apellido") or "").strip() or None
+			primer_nombre = (row.get("primer_nombre") or "").strip()
+			segundo_nombre = (row.get("segundo_nombre") or "").strip() or None
 			tipo_documento = _normalize_tipo((row.get("tipo_documento") or "").strip())
 			documento = (row.get("documento") or "").strip()
 			correo = (row.get("correo") or "").strip() or None
@@ -73,7 +90,7 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 			telegram_id = (row.get("telegram_id") or "").strip() or None
 			grado = int((row.get("grado") or "").strip())
 
-			if not (apellidos and nombres and documento and tipo_documento):
+			if not (primer_apellido and primer_nombre and documento and tipo_documento):
 				skipped += 1
 				continue
 
@@ -86,11 +103,14 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 			if student is None:
 				student = Student(
 					numero_estudiante=numero,
-					apellidos=apellidos,
-					nombres=nombres,
+					primer_apellido=primer_apellido,
+					segundo_apellido=segundo_apellido,
+					primer_nombre=primer_nombre,
+					segundo_nombre=segundo_nombre,
 					tipo_documento=tipo_documento,
 					documento=documento,
 					correo=correo,
+					telefono_acudiente=telefono,
 					telegram_id=telegram_id,
 					grade=grade,
 				)
@@ -98,13 +118,14 @@ def import_students(file_stream, session: Session, qr_dir: Path) -> dict:
 				created += 1
 			else:
 				student.numero_estudiante = numero
-				student.apellidos = apellidos
-				student.nombres = nombres
+				student.primer_apellido = primer_apellido
+				student.segundo_apellido = segundo_apellido
+				student.primer_nombre = primer_nombre
+				student.segundo_nombre = segundo_nombre
 				student.tipo_documento = tipo_documento
 				student.correo = correo
 				student.telefono_acudiente = telefono
 				student.telegram_id = telegram_id
-				student.telefono_acudiente = telefono
 				student.grade = grade
 				updated += 1
 

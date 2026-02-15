@@ -15,9 +15,17 @@ def build_entry_message(student, hora: str) -> str:
     Returns:
         Mensaje para el acudiente
     """
-    full_name = f"{student.apellidos} {student.nombres}".strip()
+    # Construir nombre completo desde 4 campos separados
+    name_parts = [student.primer_apellido]
+    if student.segundo_apellido:
+        name_parts.append(student.segundo_apellido)
+    name_parts.append(student.primer_nombre)
+    if student.segundo_nombre:
+        name_parts.append(student.segundo_nombre)
+    full_name = " ".join(name_parts)
+    
     return (
-        f"✅ *Edu Check - Entrada Registrada*\n\n"
+        f"✅ Edu Check - Entrada Registrada\n\n"
         f"{full_name} con cédula {student.documento} "
         f"del grado {student.grade.numero} "
         f"registró su entrada a las {hora}."
@@ -35,9 +43,17 @@ def build_absence_message(student, hora: str) -> str:
     Returns:
         Mensaje para el acudiente
     """
-    full_name = f"{student.apellidos} {student.nombres}".strip()
+    # Construir nombre completo desde 4 campos separados
+    name_parts = [student.primer_apellido]
+    if student.segundo_apellido:
+        name_parts.append(student.segundo_apellido)
+    name_parts.append(student.primer_nombre)
+    if student.segundo_nombre:
+        name_parts.append(student.segundo_nombre)
+    full_name = " ".join(name_parts)
+    
     return (
-        f"⚠️ *Edu Check - Reporte de Ausencia*\n\n"
+        f"⚠️ Edu Check - Reporte de Ausencia\n\n"
         f"{full_name} con cédula {student.documento} "
         f"del grado {student.grade.numero} "
         f"no ha registrado entrada hasta las {hora}."

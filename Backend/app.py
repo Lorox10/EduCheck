@@ -24,7 +24,9 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    CORS(app)
+    # Configurar CORS simple para desarrollo
+    CORS(app, origins="*", methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"], 
+         allow_headers=["Content-Type", "Authorization"])
 
     init_db()
     settings = Settings()
@@ -39,10 +41,13 @@ def create_app() -> Flask:
 
     @app.get("/students/template")
     def download_template() -> Response:
+        """Descarga plantilla CSV vacía con encabezados"""
         headers = [
             "numero",
-            "apellidos",
-            "nombres",
+            "primer_apellido",
+            "segundo_apellido",
+            "primer_nombre",
+            "segundo_nombre",
             "tipo_documento",
             "documento",
             "correo",
@@ -50,15 +55,65 @@ def create_app() -> Flask:
             "telegram_id",
             "grado",
         ]
+        
         output = io.StringIO()
-        writer = csv.writer(output)
+        # Usar punto y coma como delimitador para Excel en español
+        writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(headers)
+        
         content = output.getvalue()
-        response = Response(content, mimetype="text/csv")
+        
+        # Agregar BOM UTF-8 para que Excel reconozca caracteres especiales
+        content_with_bom = '\ufeff' + content
+        
+        response = Response(content_with_bom, mimetype="text/csv; charset=utf-8")
         response.headers["Content-Disposition"] = (
-            "attachment; filename=estudiantes_template.csv"
+            "attachment; filename=estudiantes_plantilla.csv"
         )
+        response.headers["Content-Type"] = "text/csv; charset=utf-8"
         return response
+
+    @app.get("/students")
+    def list_students() -> tuple[dict, int]:
+        """Lista todos los estudiantes"""
+        with get_session() as session:
+            students = session.scalars(select(Student).order_by(Student.id)).all()
+            data = [
+                {
+                    "id": s.id,
+                    "numero_estudiante": s.numero_estudiante,
+                    "primer_apellido": s.primer_apellido,
+                    "segundo_apellido": s.segundo_apellido,
+                    "primer_nombre": s.primer_nombre,
+                    "segundo_nombre": s.segundo_nombre,
+                    "documento": s.documento,
+                    "grado": s.grade.numero,
+                    "telefono_acudiente": s.telefono_acudiente,
+                    "telegram_id": s.telegram_id,
+                }
+                for s in students
+            ]
+        return {"estudiantes": data, "total": len(data)}, 200
+
+    @app.patch("/students/<int:student_id>/telegram")
+    def update_telegram_id(student_id: int) -> tuple[dict, int]:
+        """Actualiza el telegram_id de un estudiante"""
+        payload = request.get_json(silent=True) or {}
+        telegram_id = payload.get("telegram_id", "").strip()
+        
+        with get_session() as session:
+            student = session.scalar(select(Student).where(Student.id == student_id))
+            if student is None:
+                return {"error": "Estudiante no encontrado"}, 404
+            
+            student.telegram_id = telegram_id if telegram_id else None
+            session.commit()
+            
+        return {
+            "id": student_id,
+            "telegram_id": telegram_id,
+            "mensaje": "Telegram ID actualizado"
+        }, 200
 
     @app.get("/students/<int:student_id>/qr")
     def download_student_qr(student_id: int):
@@ -80,7 +135,9 @@ def create_app() -> Flask:
                 student.qr_path = ensure_qr(settings.qr_dir, student.documento)
                 qr_path = Path(student.qr_path)
 
-            full_name = f"{student.apellidos} {student.nombres}".strip()
+            parts = [student.primer_apellido, student.segundo_apellido or "", 
+                     student.primer_nombre, student.segundo_nombre or ""]
+            full_name = " ".join(p for p in parts if p).strip()
             image_stream = render_qr_with_name(qr_path, full_name)
 
         filename = f"qr_{student_id}.png"
@@ -151,12 +208,18 @@ def create_app() -> Flask:
     @app.post("/attendance/check-in")
     def attendance_check_in() -> tuple[dict, int]:
         payload = request.get_json(silent=True) or {}
+        print(f"[ATTENDANCE] Raw payload: {payload}")
+        print(f"[ATTENDANCE] Request headers: {dict(request.headers)}")
         documento = (payload.get("documento") or "").strip()
+        print(f"[ATTENDANCE] Documento after strip: '{documento}'")
         if not documento:
+            print(f"[ATTENDANCE] Error: documento vacío o no proporcionado")
             return {"error": "Documento requerido"}, 400
 
+        print(f"[ATTENDANCE] Procesando documento: {documento}")
         with get_session() as session:
             result = register_checkin(session, documento)
+        print(f"[ATTENDANCE] Resultado del registro: {result}")
         if "error" in result:
             return result, 404
         return result, 200
@@ -170,6 +233,41 @@ def create_app() -> Flask:
                 result = send_absence_alerts(session, settings)
                 session.commit()
             return result, 200
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    @app.get("/telegram/updates")
+    def get_telegram_updates() -> tuple[dict, int]:
+        """Obtiene los últimos mensajes del bot para ver el chat_id de usuarios"""
+        import requests
+        try:
+            response = requests.get(
+                f"https://api.telegram.org/bot{settings.telegram_token}/getUpdates",
+                timeout=10
+            )
+            response.raise_for_status()
+            return response.json(), 200
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    @app.delete("/test/clear-attendance")
+    def clear_today_attendance() -> tuple[dict, int]:
+        """Borra todos los registros de asistencia de hoy para testing"""
+        from datetime import date
+        from models import Attendance, NotificationLog
+        try:
+            with get_session() as session:
+                # Borrar logs de notificación primero (por foreign key)
+                session.query(NotificationLog).filter(
+                    NotificationLog.fecha == date.today()
+                ).delete()
+                
+                # Luego borrar asistencias
+                deleted = session.query(Attendance).filter(
+                    Attendance.fecha == date.today()
+                ).delete()
+                session.commit()
+            return {"eliminados": deleted}, 200
         except Exception as e:
             return {"error": str(e)}, 500
 

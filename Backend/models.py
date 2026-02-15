@@ -23,8 +23,10 @@ class Student(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     numero_estudiante: Mapped[int] = mapped_column(Integer, nullable=False)
-    apellidos: Mapped[str] = mapped_column(String(100), nullable=False)
-    nombres: Mapped[str] = mapped_column(String(100), nullable=False)
+    primer_apellido: Mapped[str] = mapped_column(String(50), nullable=False)
+    segundo_apellido: Mapped[str] = mapped_column(String(50), nullable=True)
+    primer_nombre: Mapped[str] = mapped_column(String(50), nullable=False)
+    segundo_nombre: Mapped[str] = mapped_column(String(50), nullable=True)
     tipo_documento: Mapped[str] = mapped_column(String(4), nullable=False)
     documento: Mapped[str] = mapped_column(String(32), nullable=False)
     correo: Mapped[str] = mapped_column(String(120), nullable=True)

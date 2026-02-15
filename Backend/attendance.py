@@ -38,18 +38,42 @@ def register_checkin(session: Session, documento: str) -> dict:
     session.flush()
 
     # Enviar notificación de entrada al acudiente
-    if student.telegram_id:
-        client = TelegramClient(settings)
-        message = build_entry_message(student, hora_str)
-        status, error = client.send_text(student.telegram_id, message)
-        
-        # Registrar el envío de notificación
-        log = NotificationLog(
-            student_id=student.id,
-            fecha=today,
-            status=status,
-            error=error,
-        )
-        session.add(log)
+    telegram_status = None
+    telegram_error = None
     
-    return {"status": "registrado"}
+    print(f"[ATTENDANCE] Enviando notificación - telegram_id={student.telegram_id}")
+    
+    if student.telegram_id:
+        try:
+            client = TelegramClient(settings)
+            message = build_entry_message(student, hora_str)
+            print(f"[TELEGRAM] Mensaje construido: {message[:50]}...")
+            print(f"[TELEGRAM] Enviando a chat_id={student.telegram_id}")
+            
+            status, error = client.send_text(student.telegram_id, message)
+            telegram_status = status
+            telegram_error = error
+            
+            print(f"[TELEGRAM] Resultado: status={status}, error={error}")
+            
+            # Registrar el envío de notificación
+            log = NotificationLog(
+                student_id=student.id,
+                fecha=today,
+                status=status,
+                error=error,
+            )
+            session.add(log)
+        except Exception as e:
+            print(f"[TELEGRAM] Excepción al enviar: {str(e)}")
+            telegram_status = "error"
+            telegram_error = str(e)
+    else:
+        print(f"[TELEGRAM] telegram_id vacío para estudiante {student.documento}")
+    
+    session.commit()
+    return {
+        "status": "registrado",
+        "telegram_status": telegram_status,
+        "telegram_error": telegram_error
+    }
