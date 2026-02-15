@@ -25,6 +25,11 @@ Edu Check es un sistema automatizado que permite a los colegios:
 - ✅ Gestión de estudiantes (búsqueda, impresión, grados)
 - ✅ Importación de CSV con validación
 - ✅ Base de datos MySQL
+- ✅ Dashboard de asistencia en tiempo real con gráficos
+- ✅ Configuración flexible de días de clase
+- ✅ Reportes mensuales automáticos en PDF por grado
+- ✅ Descarga de reportes históricos
+- ✅ Filtrado de datos por grado
 
 **Ready for production** con preparación adecuada de User IDs de Telegram.
 
@@ -721,6 +726,85 @@ Debe devolver información del bot, no error.
 3. **Probá con algunos estudiantes reales**
 
 4. **Monitorea logs inicialmente** para detectar problemas
+
+---
+
+## 📊 Dashboard y Reportes
+
+### Dashboard de Asistencia
+
+El sistema cuenta con un dashboard interactivo en tiempo real que muestra:
+
+- **Estadísticas de hoy:** Total de estudiantes, presentes, ausentes y porcentaje de asistencia
+- **Filtrado por grado:** Visualiza estadísticas específicas de cada grado
+- **Gráficos visuales:** Barras y gráficos circulares con distribución de asistencia
+- **Acciones rápidas:** 
+  - Escanear más QR desde el dashboard
+  - Ver reportes detallados
+  - Descargar información en PDF
+
+**Cómo acceder:**
+
+1. En la página principal, haz clic en **"Dashboard"**
+2. Verás las estadísticas actuales de asistencia
+3. Usa el filtro para ver datos de grados específicos
+
+---
+
+### ⚙️ Configuración de Días de Clase
+
+Uno de los problemas más comunes es contar ausencias sin saber qué días realmente hay clase. Edu Check permite configurar dinámicamente qué días tu institución tiene clases.
+
+**Por defecto:** Lunes a viernes habilitados (fin de semana deshabilitado)
+
+**Cómo configurar:**
+
+1. Ve al **Dashboard**
+2. Haz clic en el botón **"⚙️ Configurar Días de Clase"**
+3. Selecciona/deselecciona los días que haya clase en tu institución
+4. Los cambios se guardan automáticamente
+5. Los cálculos de ausencias se actualizan basándose en esta configuración
+
+**Ejemplo:** Si tu colegio solo tiene clase lunes, miércoles y viernes:
+
+- Deselecciona martes y jueves
+- Un estudiante sin asistencias en una semana será contabilizado con **3 ausencias**, no 5
+
+---
+
+### 📄 Reportes Mensuales de Inasistentes
+
+El sistema genera automáticamente reportes PDF con la lista completa de inasistentes por grado al final de cada mes.
+
+**Características:**
+
+- ✅ Generación automática el primer día de cada mes a las 23:59
+- ✅ Generación manual bajo demanda desde la UI
+- ✅ PDF profesional con:
+  - Nombre completo de cada estudiante
+  - Número de identificación
+  - Total de ausencias en el mes
+  - Organizados por grado
+- ✅ Histórico de todos los reportes disponible para descarga
+
+**Cómo acceder a los reportes:**
+
+1. En la página principal, haz clic en **"Reportes Mensuales"**
+2. Verás todos los reportes disponibles (organizados por mes y año)
+3. Haz clic en **"Descargar PDF"** para cualquier reporte
+4. O haz clic en **"Generar Reporte Ahora"** para crear uno manualmente
+
+**Almacenamiento:**
+
+Los reportes se guardan automáticamente en: `Backend/monthly_reports/`
+
+**Formato del archivo:**
+
+```
+inasistentes_AAAA_MM.pdf
+```
+
+Ejemplo: `inasistentes_2026_02.pdf` (Reportes de febrero de 2026)
 
 ---
 

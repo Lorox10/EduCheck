@@ -1,0 +1,92 @@
+<div class="reports-container">
+    <div class="header-section">
+        <button class="back-button" (click)="goBack()">← Volver</button>
+        <h1>📋 Histórico de Ausencias</h1>
+        <p class="subtitle">Últimos 7 días por estudiante</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-banner">
+        <span>⚠️ {{ errorMessage }}</span>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
+
+    <!-- Filter -->
+    <div *ngIf="!isLoading && availableGrades.length > 0" class="filter-section">
+        <label for="grade-select">Filtrar por Grado:</label>
+        <select id="grade-select" [(ngModel)]="selectedGrade" (change)="filterByGrade(selectedGrade)"
+            class="grade-select">
+            <option value="all">Todos los grados</option>
+            <option *ngFor="let grade of availableGrades" [value]="grade">Grado {{ grade }}</option>
+        </select>
+    </div>
+
+    <!-- No data message -->
+    <div *ngIf="!isLoading && filteredRecords.length === 0" class="no-data-banner">
+        <p>✅ No hay ausencias registradas</p>
+    </div>
+
+    <!-- Records Table -->
+    <div *ngIf="!isLoading && filteredRecords.length > 0" class="records-section">
+        <div class="records-grid">
+            <div *ngFor="let record of filteredRecords" class="record-card">
+                <div class="record-header">
+                    <h3>{{ getFullName(record) }}</h3>
+                    <span class="grade-badge">Grado {{ record.grado }}</span>
+                </div>
+
+                <div class="record-content">
+                    <p class="document">📄 {{ record.documento }}</p>
+
+                    <div class="absence-stat">
+                        <span class="label">Total de ausencias (7 días):</span>
+                        <span class="value">{{ record.ausencias }}</span>
+                    </div>
+
+                    <div *ngIf="record.ultimas_faltas.length > 0" class="last-absences">
+                        <p class="label">Últimas faltas:</p>
+                        <div class="dates-list">
+                            <span *ngFor="let fecha of record.ultimas_faltas" class="date-badge">
+                                {{ fecha }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div *ngIf="record.ausencias === 0" class="status-ok">
+                        ✅ Asistencia perfecta en los últimos 7 días
+                    </div>
+                    <div *ngIf="record.ausencias > 0 && record.ausencias <= 2" class="status-warning">
+                        ⚠️ Pocas ausencias
+                    </div>
+                    <div *ngIf="record.ausencias > 2" class="status-critical">
+                        🔴 Múltiples ausencias
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3>Resumen General</h3>
+                <div class="stat">
+                    <span class="label">Total de estudiantes:</span>
+                    <span class="value">{{ filteredRecords.length }}</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Estudiantes sin ausencias:</span>
+                    <span class="value">{{ getStudentsWithoutAbsences() }}</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Total de ausencias:</span>
+                    <span class="value">{{ getTotalAbsences() }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

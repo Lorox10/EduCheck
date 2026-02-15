@@ -41,4 +41,8 @@ export class StudentsService {
       telegram_id: telegramId
     });
   }
+
+  getStudentsByGrade(grado: number | null): Observable<Student[]> {
+    return this.http.get<Student[]>(`${this.apiUrl}/students`);
+  }
 }

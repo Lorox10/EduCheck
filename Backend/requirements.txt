@@ -15,9 +15,6 @@ marshmallow==3.20.1
 # Tareas programadas
 APScheduler==3.10.4
 
-# Utilidades
-python-dateutil==2.8.2
-pytz==2024.1
-qrcode==7.4.2
-Pillow==10.4.0
-requests==2.32.3
+# Generación de PDFs
+reportlab==4.0.9
+

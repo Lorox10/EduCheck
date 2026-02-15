@@ -14,8 +14,9 @@ from db import db_healthcheck, get_session, init_db
 from scheduler import start_scheduler
 from attendance import register_checkin
 from importer import import_students
-from models import Student, UploadLog
+from models import Student, UploadLog, Attendance, Grade, ClassDays
 from qr import ensure_qr, render_qr_with_name
+from monthly_reports import generate_monthly_report, get_available_reports, REPORTS_DIR
 from sqlalchemy import select, desc
 
 
@@ -223,6 +224,348 @@ def create_app() -> Flask:
         if "error" in result:
             return result, 404
         return result, 200
+
+    @app.get("/attendance/today")
+    def get_attendance_today() -> tuple[dict, int]:
+        """Obtiene estadísticas de asistencia de hoy"""
+        from datetime import date
+        try:
+            with get_session() as session:
+                today = date.today()
+                
+                # Contar presentes hoy
+                presente_count = session.query(Attendance).filter(
+                    Attendance.fecha == today
+                ).count()
+                
+                # Contar total de estudiantes
+                total_students = session.query(Student).count()
+                
+                # Ausentes = Total - Presentes
+                ausente_count = total_students - presente_count
+                
+                # Obtener grados con asistencia registrada hoy
+                grados_con_asistencia = session.query(Grade.numero).join(
+                    Student, Student.grade_id == Grade.id
+                ).join(
+                    Attendance, Attendance.student_id == Student.id
+                ).filter(
+                    Attendance.fecha == today
+                ).distinct().all()
+                
+                grados = sorted([g[0] for g in grados_con_asistencia])
+                
+                return {
+                    "presente": presente_count,
+                    "ausente": ausente_count,
+                    "total": total_students,
+                    "fecha": today.isoformat(),
+                    "grados": grados
+                }, 200
+        except Exception as e:
+            print(f"[ATTENDANCE] Error en get_attendance_today: {str(e)}")
+            return {"error": str(e), "presente": 0, "ausente": 0, "total": 0, "grados": []}, 500
+
+    @app.get("/attendance/<int:grado>")
+    def get_attendance_by_grade(grado: int) -> tuple[dict, int]:
+        """Obtiene estadísticas de asistencia de hoy por grado"""
+        from datetime import date
+        try:
+            with get_session() as session:
+                today = date.today()
+                
+                # Obtener el grado
+                grade = session.query(Grade).filter(Grade.numero == grado).first()
+                if not grade:
+                    return {"error": f"Grado {grado} no encontrado"}, 404
+                
+                # Contar presentes del grado hoy
+                presente_count = session.query(Attendance).join(
+                    Student, Attendance.student_id == Student.id
+                ).filter(
+                    Attendance.fecha == today,
+                    Student.grade_id == grade.id
+                ).count()
+                
+                # Contar total de estudiantes del grado
+                total_students = session.query(Student).filter(
+                    Student.grade_id == grade.id
+                ).count()
+                
+                # Ausentes del grado
+                ausente_count = total_students - presente_count
+                
+                return {
+                    "presente": presente_count,
+                    "ausente": ausente_count,
+                    "total": total_students,
+                    "grado": grado,
+                    "fecha": today.isoformat()
+                }, 200
+        except Exception as e:
+            print(f"[ATTENDANCE] Error en get_attendance_by_grade: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.get("/attendance/absences")
+    def get_absence_history() -> tuple[dict, int]:
+        """Obtiene histórico de ausencias de los últimos 7 días según días de clase configurados"""
+        from datetime import date, timedelta, datetime
+        try:
+            with get_session() as session:
+                today = date.today()
+                week_ago = today - timedelta(days=7)
+                
+                # Obtener configuración de días de clase
+                class_days_config = session.query(ClassDays).first()
+                if not class_days_config:
+                    # Si no existe, crear configuración por defecto
+                    class_days_config = ClassDays()
+                    session.add(class_days_config)
+                    session.commit()
+                
+                # Mapeo de día de semana (0=lunes, 6=domingo)
+                dias_semana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+                dias_config = {
+                    0: class_days_config.lunes,
+                    1: class_days_config.martes,
+                    2: class_days_config.miercoles,
+                    3: class_days_config.jueves,
+                    4: class_days_config.viernes,
+                    5: class_days_config.sabado,
+                    6: class_days_config.domingo,
+                }
+                
+                # Contar días de clase en los últimos 7 días
+                dias_clase = 0
+                for i in range(8):
+                    check_date = today - timedelta(days=i)
+                    if check_date >= week_ago:
+                        dia_semana = check_date.weekday()
+                        if dias_config[dia_semana]:
+                            dias_clase += 1
+                
+                # Obtener todos los estudiantes
+                students = session.query(Student).all()
+                
+                records = []
+                for student in students:
+                    # Contar asistencias reales en los últimos 7 días
+                    asistencias_reales = session.query(Attendance).filter(
+                        Attendance.student_id == student.id,
+                        Attendance.fecha >= week_ago,
+                        Attendance.fecha <= today
+                    ).count()
+                    
+                    # Ausencias = días de clase - asistencias reales
+                    ausencias_reales = dias_clase - asistencias_reales
+                    
+                    # Obtener las fechas de las últimas faltas (dentro de días de clase)
+                    ultimas_faltas = []
+                    for i in range(8):
+                        check_date = today - timedelta(days=i)
+                        if check_date >= week_ago:
+                            dia_semana = check_date.weekday()
+                            if dias_config[dia_semana]:  # Solo si es día de clase
+                                if not session.query(Attendance).filter(
+                                    Attendance.student_id == student.id,
+                                    Attendance.fecha == check_date
+                                ).first():
+                                    ultimas_faltas.append(check_date.strftime('%d/%m/%Y'))
+                    
+                    records.append({
+                        "id": student.id,
+                        "primer_apellido": student.primer_apellido,
+                        "segundo_apellido": student.segundo_apellido,
+                        "primer_nombre": student.primer_nombre,
+                        "segundo_nombre": student.segundo_nombre,
+                        "grado": student.grade.numero,
+                        "documento": student.documento,
+                        "ausencias": max(0, ausencias_reales),  # No mostrar negativos
+                        "ultimas_faltas": ultimas_faltas[:5]  # Mostrar últimas 5 faltas
+                    })
+                
+                return {"records": records, "dias_clase": dias_clase}, 200
+        except Exception as e:
+            print(f"[ATTENDANCE] Error en get_absence_history: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.get("/class-days")
+    def get_class_days() -> tuple[dict, int]:
+        """Obtiene configuración de días de clase"""
+        try:
+            with get_session() as session:
+                class_days = session.query(ClassDays).first()
+                if not class_days:
+                    # Crear configuración por defecto
+                    class_days = ClassDays()
+                    session.add(class_days)
+                    session.commit()
+                
+                return {
+                    "lunes": class_days.lunes,
+                    "martes": class_days.martes,
+                    "miercoles": class_days.miercoles,
+                    "jueves": class_days.jueves,
+                    "viernes": class_days.viernes,
+                    "sabado": class_days.sabado,
+                    "domingo": class_days.domingo,
+                }, 200
+        except Exception as e:
+            print(f"[CLASS_DAYS] Error en get_class_days: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.post("/class-days")
+    def update_class_days() -> tuple[dict, int]:
+        """Actualiza configuración de días de clase"""
+        try:
+            data = request.get_json()
+            with get_session() as session:
+                class_days = session.query(ClassDays).first()
+                if not class_days:
+                    class_days = ClassDays()
+                    session.add(class_days)
+                
+                # Actualizar los días
+                if "lunes" in data:
+                    class_days.lunes = data["lunes"]
+                if "martes" in data:
+                    class_days.martes = data["martes"]
+                if "miercoles" in data:
+                    class_days.miercoles = data["miercoles"]
+                if "jueves" in data:
+                    class_days.jueves = data["jueves"]
+                if "viernes" in data:
+                    class_days.viernes = data["viernes"]
+                if "sabado" in data:
+                    class_days.sabado = data["sabado"]
+                if "domingo" in data:
+                    class_days.domingo = data["domingo"]
+                
+                session.commit()
+                return {
+                    "message": "Configuración actualizada",
+                    "lunes": class_days.lunes,
+                    "martes": class_days.martes,
+                    "miercoles": class_days.miercoles,
+                    "jueves": class_days.jueves,
+                    "viernes": class_days.viernes,
+                    "sabado": class_days.sabado,
+                    "domingo": class_days.domingo,
+                }, 200
+        except Exception as e:
+            print(f"[CLASS_DAYS] Error en update_class_days: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.get("/monthly-reports")
+    def get_monthly_reports() -> tuple[dict, int]:
+        """Obtiene lista de reportes mensuales disponibles"""
+        try:
+            reports = get_available_reports()
+            return {"reports": reports}, 200
+        except Exception as e:
+            print(f"[MONTHLY_REPORTS] Error en get_monthly_reports: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.post("/monthly-reports/generate")
+    def post_generate_monthly_report() -> tuple[dict, int]:
+        """Genera manualmente un reporte mensual"""
+        try:
+            filepath = generate_monthly_report()
+            if filepath:
+                return {"message": "Reporte generado exitosamente", "file": Path(filepath).name}, 200
+            else:
+                return {"error": "No hay datos de inasistentes para generar reporte"}, 400
+        except Exception as e:
+            print(f"[MONTHLY_REPORTS] Error en generate_monthly_report: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.get("/monthly-reports/<filename>")
+    def download_monthly_report(filename: str) -> Response:
+        """Descarga un reporte mensual específico"""
+        try:
+            # Validar que el filename tenga el formato correcto
+            if not filename.startswith("inasistentes_") or not filename.endswith(".pdf"):
+                return {"error": "Archivo inválido"}, 400
+            
+            filepath = REPORTS_DIR / filename
+            if not filepath.exists():
+                return {"error": "Archivo no encontrado"}, 404
+            
+            return send_file(str(filepath), as_attachment=True, download_name=filename)
+        except Exception as e:
+            print(f"[MONTHLY_REPORTS] Error en download_monthly_report: {str(e)}")
+            return {"error": str(e)}, 500
+
+    @app.get("/reports/pdf")
+    def download_attendance_pdf() -> Response:
+        """Genera y descarga un PDF con las estadísticas de asistencia"""
+        from datetime import date
+        
+        try:
+            with get_session() as session:
+                today = date.today()
+                
+                # Obtener estadísticas
+                presente_count = session.query(Attendance).filter(
+                    Attendance.fecha == today
+                ).count()
+                
+                total_students = session.query(Student).count()
+                ausente_count = total_students - presente_count
+                percentage = (presente_count / total_students * 100) if total_students > 0 else 0
+                
+                # Crear contenido HTML simple que se descargue como PDF
+                html_content = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Reporte de Asistencia</title>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                        h1 {{ color: #667eea; text-align: center; }}
+                        table {{ border-collapse: collapse; width: 100%; margin-top: 20px; }}
+                        th, td {{ border: 1px solid #ddd; padding: 10px; text-align: left; }}
+                        th {{ background-color: #667eea; color: white; }}
+                        tr:nth-child(even) {{ background-color: #f2f2f2; }}
+                    </style>
+                </head>
+                <body>
+                    <h1>📊 Reporte de Asistencia</h1>
+                    <p><strong>Fecha:</strong> {today.strftime('%d/%m/%Y')}</p>
+                    <table>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Cantidad</th>
+                        </tr>
+                        <tr>
+                            <td>Total de Estudiantes</td>
+                            <td>{total_students}</td>
+                        </tr>
+                        <tr>
+                            <td>Presentes</td>
+                            <td>{presente_count}</td>
+                        </tr>
+                        <tr>
+                            <td>Ausentes</td>
+                            <td>{ausente_count}</td>
+                        </tr>
+                        <tr>
+                            <td>Porcentaje Asistencia</td>
+                            <td>{percentage:.1f}%</td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                """
+                
+                response = Response(html_content, mimetype='text/html')
+                response.headers['Content-Disposition'] = f'attachment; filename=asistencia_{today}.html'
+                return response
+                
+        except Exception as e:
+            print(f"[REPORTS] Error en download_attendance_pdf: {str(e)}")
+            return {"error": str(e)}, 500
 
     @app.post("/test/send-alerts")
     def test_send_alerts() -> tuple[dict, int]:

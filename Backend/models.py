@@ -1,9 +1,23 @@
 from datetime import date, datetime, time
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Time, UniqueConstraint, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Time, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
+
+
+class ClassDays(Base):
+    __tablename__ = "class_days"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    lunes: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    martes: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    miercoles: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    jueves: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    viernes: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    sabado: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    domingo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
 
 class Grade(Base):

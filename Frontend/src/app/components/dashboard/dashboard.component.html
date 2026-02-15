@@ -1,0 +1,171 @@
+<div class="dashboard-container">
+    <div class="header-section">
+        <h1>📊 Dashboard de Asistencia</h1>
+        <p class="subtitle">Estadísticas en tiempo real del sistema</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-banner">
+        <span>⚠️ {{ errorMessage }}</span>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
+
+    <!-- Grade Filter -->
+    <div *ngIf="!isLoading && availableGrades.length > 0" class="filter-section">
+        <label for="grade-select">Filtrar por Grado:</label>
+        <select id="grade-select" [(ngModel)]="selectedGrade" (change)="changeGrade(selectedGrade)"
+            class="grade-select">
+            <option value="all">Todos los grados</option>
+            <option *ngFor="let grade of availableGrades" [value]="grade">Grado {{ grade }}</option>
+        </select>
+    </div>
+
+    <!-- Class Days Configuration -->
+    <div class="class-days-section">
+        <button class="config-button" (click)="toggleClassDaysConfig()">
+            <span>⚙️ {{ showClassDaysConfig ? 'Ocultar' : 'Configurar' }} Días de Clase</span>
+        </button>
+
+        <div *ngIf="showClassDaysConfig" class="class-days-config">
+            <h3>Selecciona los días que hai clase</h3>
+            <div class="days-grid">
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.lunes" (change)="toggleClassDay('lunes')">
+                    <span>Lunes</span>
+                </label>
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.martes" (change)="toggleClassDay('martes')">
+                    <span>Martes</span>
+                </label>
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.miercoles" (change)="toggleClassDay('miercoles')">
+                    <span>Miércoles</span>
+                </label>
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.jueves" (change)="toggleClassDay('jueves')">
+                    <span>Jueves</span>
+                </label>
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.viernes" (change)="toggleClassDay('viernes')">
+                    <span>Viernes</span>
+                </label>
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.sabado" (change)="toggleClassDay('sabado')">
+                    <span>Sábado</span>
+                </label>
+                <label class="day-checkbox">
+                    <input type="checkbox" [(ngModel)]="classDays.domingo" (change)="toggleClassDay('domingo')">
+                    <span>Domingo</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- No data message -->
+    <div *ngIf="!isLoading && availableGrades.length === 0" class="no-data-banner">
+        <p>📭 No hay registros de asistencia aún hoy</p>
+        <p class="subtitle">Los grados aparecerán aquí cuando se registre la primera asistencia</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div *ngIf="!isLoading" class="stats-grid">
+        <!-- Total Estudiantes -->
+        <div class="stat-card total">
+            <div class="card-icon">👥</div>
+            <div class="card-content">
+                <p class="card-label">Total de Estudiantes</p>
+                <h2 class="card-value">{{ totalStudents }}</h2>
+            </div>
+        </div>
+
+        <!-- Presentes -->
+        <div class="stat-card present">
+            <div class="card-icon">✅</div>
+            <div class="card-content">
+                <p class="card-label">Presentes Hoy</p>
+                <h2 class="card-value">{{ presentToday }}</h2>
+            </div>
+        </div>
+
+        <!-- Ausentes -->
+        <div class="stat-card absent">
+            <div class="card-icon">❌</div>
+            <div class="card-content">
+                <p class="card-label">Ausentes Hoy</p>
+                <h2 class="card-value">{{ absentToday }}</h2>
+            </div>
+        </div>
+
+        <!-- Porcentaje -->
+        <div class="stat-card percentage">
+            <div class="card-icon">📈</div>
+            <div class="card-content">
+                <p class="card-label">Asistencia</p>
+                <h2 class="card-value">{{ attendancePercentage }}%</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Indicators -->
+    <div *ngIf="!isLoading" class="charts-section">
+        <!-- Attendance Bar -->
+        <div class="chart-card">
+            <h3>Barra de Asistencia Hoy</h3>
+            <div class="attendance-bar-container">
+                <div class="attendance-bar">
+                    <div class="bar-segment present" [style.width.%]="attendancePercentage">
+                        <span class="bar-label" *ngIf="presentToday > 0">{{ presentToday }} Presentes</span>
+                    </div>
+                    <div class="bar-segment absent" [style.width.%]="100 - attendancePercentage">
+                        <span class="bar-label" *ngIf="absentToday > 0">{{ absentToday }} Ausentes</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bar-legend">
+                <div class="legend-item">
+                    <div class="legend-color present"></div>
+                    <span>Presentes: {{ presentToday }}</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color absent"></div>
+                    <span>Ausentes: {{ absentToday }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pie Chart Alternative (Simple) -->
+        <div class="chart-card">
+            <h3>Distribución de Asistencia</h3>
+            <div class="pie-chart-container">
+                <div class="pie-chart">
+                    <div class="pie-segment present" [style.width]="attendancePercentage + '%'">
+                    </div>
+                    <div class="pie-segment absent" [style.width]="(100 - attendancePercentage) + '%'">
+                    </div>
+                </div>
+                <div class="pie-stats">
+                    <p class="present-text">{{ attendancePercentage }}% Presente</p>
+                    <p class="absent-text">{{ (100 - attendancePercentage) }}% Ausente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div *ngIf="!isLoading" class="actions-section">
+        <button class="action-button primary" routerLink="/scanner">
+            <span>📱 Escanear QR</span>
+        </button>
+        <button class="action-button secondary" (click)="goToReports()">
+            <span>📋 Ver Reportes</span>
+        </button>
+        <button class="action-button tertiary" (click)="downloadPDF()">
+            <span>⬇️ Descargar PDF</span>
+        </button>
+    </div>
+</div>
