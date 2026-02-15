@@ -1,57 +1,100 @@
 .monthly-reports-container {
   min-height: 100vh;
   padding: 30px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
-  z-index: 1;
+  z-index: 0;
+  overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/Fondo.png');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: -1;
   }
 }
 
 .reports-header {
+  --neutral-1: #f7f8f7;
+  --neutral-2: #e7e7e7;
+  --radius: 14px;
+  
   max-width: 1000px;
   margin: 0 auto 30px;
+  border-radius: var(--radius);
+  border: 2.5px solid transparent;
+  box-shadow: 0 0.5px 0.5px 1px rgb(24, 18, 18),
+    0 10px 20px rgba(0, 0, 0, 0.2), 0 4px 5px 0px rgba(0, 0, 0, 0.295);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(var(--neutral-1), var(--neutral-2)) padding-box,
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.527), rgba(0, 0, 0, 0.45)) border-box;
+  padding: 30px 25px;
+
+  &::before {
+    content: "";
+    inset: 7px 6px 6px 6px;
+    position: absolute;
+    background: linear-gradient(to top, var(--neutral-1), var(--neutral-2));
+    border-radius: 30px;
+    filter: blur(0.5px);
+    z-index: 0;
+  }
 
   h2 {
-    color: white;
+    color: #0a0909;
     font-size: 28px;
     margin: 0 0 10px;
+    font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
   }
 
   .subtitle {
-    color: rgba(255, 255, 255, 0.8);
+    color: #0a0909;
     font-size: 14px;
     margin: 0;
+    font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
   }
 }
 
 .alert {
+  --neutral-1: #f7f8f7;
+  --neutral-2: #e7e7e7;
+  --radius: 14px;
+  
   max-width: 1000px;
   margin: 0 auto 20px;
   padding: 15px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 600;
   animation: slideDown 0.3s ease;
+  font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
+  box-shadow: 0 0.5px 0.5px 1px rgba(136, 136, 136, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.2);
 
   &.error-alert {
-    background: #fee;
-    border: 2px solid #f88;
-    color: #c33;
+    background: linear-gradient(var(--neutral-1), var(--neutral-2)) padding-box;
+    border: 2.5px solid #ef4444;
+    color: #991b1b;
   }
 
   &.success-alert {
-    background: #efe;
-    border: 2px solid #8f8;
-    color: #3c3;
+    background: linear-gradient(var(--neutral-1), var(--neutral-2)) padding-box;
+    border: 2.5px solid #10b981;
+    color: #065f46;
   }
 
   span {
@@ -81,19 +124,39 @@
 }
 
 .generate-btn {
+  --neutral-1: #f7f8f7;
+  --neutral-2: #e7e7e7;
+  --radius: 30px;
+  
   padding: 12px 24px;
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  border-radius: var(--radius);
   border: none;
-  color: white;
+  box-shadow: 0 0.5px 0.5px 1px rgba(136, 136, 136, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.2);
+  color: #0a0909;
   font-weight: 600;
-  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
   font-size: 14px;
+  position: relative;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    border: 2.5px solid transparent;
+    background: linear-gradient(#4ade80, #22c55e) padding-box,
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.45)) border-box;
+    z-index: -1;
+  }
 
   &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(74, 222, 128, 0.3);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 1px 2px rgba(74, 222, 128, 0.3),
+      0 15px 30px rgba(74, 222, 128, 0.3);
   }
 
   &:disabled {
@@ -106,13 +169,13 @@
   max-width: 1000px;
   margin: 40px auto;
   text-align: center;
-  color: white;
+  color: #0a0909;
 
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
+    border: 4px solid rgba(10, 9, 9, 0.2);
+    border-top-color: #0a0909;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 15px;
@@ -120,6 +183,8 @@
 
   p {
     font-size: 14px;
+    font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
+    font-weight: 600;
   }
 }
 
@@ -130,20 +195,26 @@
 }
 
 .no-reports {
+  --neutral-1: #f7f8f7;
+  --neutral-2: #e7e7e7;
+  --radius: 14px;
+  
   max-width: 1000px;
   margin: 0 auto;
   padding: 60px 40px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 2px dashed rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
+  background: linear-gradient(var(--neutral-1), var(--neutral-2)) padding-box;
+  border: 2.5px dashed rgba(10, 9, 9, 0.3);
+  border-radius: var(--radius);
   text-align: center;
-  color: rgba(255, 255, 255, 0.9);
+  color: #0a0909;
+  box-shadow: 0 0.5px 0.5px 1px rgba(136, 136, 136, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.2);
 
   p {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
+    font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
 
     &.subtitle {
       font-size: 14px;
@@ -161,21 +232,39 @@
 }
 
 .report-card {
+  --neutral-1: #f7f8f7;
+  --neutral-2: #e7e7e7;
+  --radius: 14px;
+  
   padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: var(--radius);
+  border: 2.5px solid transparent;
+  box-shadow: 0 0.5px 0.5px 1px rgba(136, 136, 136, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.2), 0 4px 5px 0px rgba(0, 0, 0, 0.295);
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
   animation: slideUp 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(var(--neutral-1), var(--neutral-2)) padding-box,
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.527), rgba(0, 0, 0, 0.45)) border-box;
+
+  &::before {
+    content: "";
+    inset: 7px 6px 6px 6px;
+    position: absolute;
+    background: linear-gradient(to top, var(--neutral-1), var(--neutral-2));
+    border-radius: 30px;
+    filter: blur(0.5px);
+    z-index: 0;
+  }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 0 1px 2px rgba(136, 136, 136, 0.3),
+      0 15px 30px rgba(0, 0, 0, 0.3);
   }
 
   .report-info {
@@ -184,49 +273,78 @@
     justify-content: space-between;
     align-items: center;
     gap: 30px;
+    position: relative;
+    z-index: 1;
   }
 
   .report-month {
+    position: relative;
+    z-index: 1;
+    
     h3 {
-      color: white;
+      color: #0a0909;
       margin: 0 0 5px;
       font-size: 16px;
       font-weight: 600;
+      font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
     }
 
     .report-date {
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(10, 9, 9, 0.7);
       margin: 0;
       font-size: 12px;
+      font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
     }
   }
 
   .report-meta {
     display: flex;
     gap: 20px;
+    position: relative;
+    z-index: 1;
 
     .file-size {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(10, 9, 9, 0.8);
       font-size: 13px;
       font-weight: 500;
+      font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
     }
   }
 
   .download-btn {
+    --radius: 30px;
+    
     padding: 10px 20px;
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border: none;
     color: white;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 13px;
     white-space: nowrap;
+    font-family: "Galano Grotesque", Poppins, Montserrat, sans-serif;
+    box-shadow: 0 0.5px 0.5px 1px rgba(136, 136, 136, 0.2),
+      0 10px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      border: 2.5px solid transparent;
+      background: linear-gradient(#3b82f6, #2563eb) padding-box,
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.45)) border-box;
+      z-index: -1;
+    }
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 1px 2px rgba(59, 130, 246, 0.3),
+        0 15px 30px rgba(59, 130, 246, 0.3);
     }
 
     span {

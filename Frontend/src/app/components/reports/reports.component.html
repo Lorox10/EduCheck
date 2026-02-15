@@ -33,42 +33,33 @@
 
     <!-- Records Table -->
     <div *ngIf="!isLoading && filteredRecords.length > 0" class="records-section">
-        <div class="records-grid">
-            <div *ngFor="let record of filteredRecords" class="record-card">
-                <div class="record-header">
-                    <h3>{{ getFullName(record) }}</h3>
-                    <span class="grade-badge">Grado {{ record.grado }}</span>
-                </div>
-
-                <div class="record-content">
-                    <p class="document">📄 {{ record.documento }}</p>
-
-                    <div class="absence-stat">
-                        <span class="label">Total de ausencias (7 días):</span>
-                        <span class="value">{{ record.ausencias }}</span>
-                    </div>
-
-                    <div *ngIf="record.ultimas_faltas.length > 0" class="last-absences">
-                        <p class="label">Últimas faltas:</p>
-                        <div class="dates-list">
-                            <span *ngFor="let fecha of record.ultimas_faltas" class="date-badge">
-                                {{ fecha }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div *ngIf="record.ausencias === 0" class="status-ok">
-                        ✅ Asistencia perfecta en los últimos 7 días
-                    </div>
-                    <div *ngIf="record.ausencias > 0 && record.ausencias <= 2" class="status-warning">
-                        ⚠️ Pocas ausencias
-                    </div>
-                    <div *ngIf="record.ausencias > 2" class="status-critical">
-                        🔴 Múltiples ausencias
-                    </div>
-                </div>
-            </div>
-        </div>
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Grado</th>
+                    <th>Documento</th>
+                    <th>Ausencias (7 días)</th>
+                    <th>Últimas Faltas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let record of filteredRecords" [class.status-ok]="record.ausencias === 0"
+                    [class.status-warning]="record.ausencias > 0 && record.ausencias <= 2"
+                    [class.status-critical]="record.ausencias > 2">
+                    <td class="name-cell">{{ getFullName(record) }}</td>
+                    <td class="grade-cell">{{ record.grado }}</td>
+                    <td class="document-cell">{{ record.documento }}</td>
+                    <td class="absences-cell">
+                        <span class="absence-badge">{{ record.ausencias }}</span>
+                    </td>
+                    <td class="dates-cell">
+                        <span *ngIf="record.ultimas_faltas.length === 0" class="no-absences">✅</span>
+                        <span *ngFor="let fecha of record.ultimas_faltas" class="date-tag">{{ fecha }}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
         <!-- Summary Stats -->
         <div class="summary-section">
