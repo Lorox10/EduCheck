@@ -41,3 +41,15 @@ Backend/qr_codes/
 
 # Uploaded CSV files
 Backend/uploads/
+
+# Temporary data files (contains student data)
+estudiantes_temp.json
+*.csv
+
+# Development scripts (not for production)
+Backend/clean_telegram.py
+Backend/fix_ids.py
+Backend/migrate_names.py
+Backend/reset_database.py
+Backend/update_telegram_ids.py
+Backend/whatsapp.py

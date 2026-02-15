@@ -147,11 +147,13 @@ Instala lo siguiente en tu máquina:
 3. Sigue las instrucciones y recibirás un **TELEGRAM_TOKEN**
 4. Copia este token en `Backend/.env` en `TELEGRAM_TOKEN=`
 
-**Ejemplo de token:**
+**Ejemplo de token:** (no réveles esto públicamente)
 
 ```
-8507219531:AAEAUKkaHRJXcn_qtIgWBlfFuTQkL3arbFA
+***API_TOKEN_OCULTO***
 ```
+
+⚠️ **NUNCA publiques tu token en GitHub - es como una contraseña**
 
 **Paso 2: Obtener tu TELEGRAM_USER_ID (⚠️ MUY IMPORTANTE)**
 
@@ -162,9 +164,9 @@ Instala lo siguiente en tu máquina:
 1. Abre Telegram
 2. Busca al bot: **@getidsbot**
 3. Envía cualquier mensaje
-4. El bot responderá con tu User ID (número como `5936924064`)
+4. El bot responderá con tu User ID (número privado)
 5. Ese número es tu **TELEGRAM_USER_ID**
-6. Copia en `Backend/.env` en `TELEGRAM_CHAT_ID=5936924064`
+6. Copia en `Backend/.env` (no lo reveles públicamente)
 
 **Método 2: Usando la API manualmente**
 
@@ -185,9 +187,12 @@ Debe devolver información de tu bot (no error).
 **Ejemplo de .env configurado correctamente:**
 
 ```env
-TELEGRAM_TOKEN=8507219531:AAEAUKkaHRJXcn_qtIgWBlfFuTQkL3arbFA
-TELEGRAM_CHAT_ID=5936924064
+TELEGRAM_TOKEN=***xxxxxxxxxxxxxx:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx***
+TELEGRAM_CHAT_ID=***(tus_digitos_privados)***
+MYSQL_PASSWORD=***(tu_contrasena_mysql)***
 ```
+
+⚠️ **IMPORTANTE: NUNCA subes estas claves a Git - están en .env que es ignorado**
 
 ⚠️ **Para cada acudiente en el CSV, necesitas su TELEGRAM_USER_ID (no su teléfono)**
 
@@ -372,9 +377,9 @@ El CSV debe tener **exactamente estas columnas en orden**, separadas por **PUNTO
 
 ```
 numero;primer_apellido;segundo_apellido;primer_nombre;segundo_nombre;tipo_documento;documento;correo;telefono_acudiente;telegram_id;grado
-1;García;López;Carlos;Miguel;CC;1131110580;carlos@email.com;3001234567;5936924064;10
-2;Martínez;;Juan;;CC;1131110581;juan@email.com;3009876543;6994041954;9
-3;Ramírez;González;Ana;María;TI;1131110582;;3007654321;11
+1;García;López;Carlos;Miguel;CC;1000000001;estudiante1@domain.com;300****;***user_id_privado***;10
+2;Martínez;;Juan;;CC;1000000002;estudiante2@domain.com;300****;***user_id_privado***;9
+3;Ramírez;González;Ana;María;TI;1000000003;;300****;***user_id_privado***;11
 ```
 
 ### Notas Importantes
@@ -401,11 +406,10 @@ numero;primer_apellido;segundo_apellido;primer_nombre;segundo_nombre;tipo_docume
 6. **@getidsbot responde con su User ID** (ej: 5936924064)
 7. **Copia ese ID en la columna `telegram_id` del CSV**
 
-**Los User IDs son números como:**
+- **Los User IDs son números privados**
 
-- 5936924064 ✅ Correcto
-- 3104989339 ❌ Incorrecto (es un teléfono, no un ID)
-- 123456789 ✅ Correcto
+✅ Cada usuario tiene un ID único (no es su teléfono)
+⚠️ NO publiques estos números - son datos privados
 
 ⚠️ **Cada acudiente diferente = ID diferente en el CSV**
 
@@ -473,7 +477,7 @@ Descarga de QR individual:
 Registro de asistencia:
 
 - Endpoint: `POST /attendance/check-in`
-- Body JSON: `{"documento":"1131110580"}`
+- Body JSON: `{"documento":"1000000001"}`
 - **Envía notificación inmediata** al acudiente cuando registra entrada (lectura de QR)
 
 ---
@@ -648,7 +652,7 @@ cd Frontend && npm start
 # Crea un CSV con un estudiante
 @"
 numero;primer_apellido;segundo_apellido;primer_nombre;segundo_nombre;tipo_documento;documento;correo;telefono_acudiente;telegram_id;grado
-1;Prueba;;Test;;CC;1234567890;;3001234567;5936924064;10
+1;Prueba;;Test;;CC;1000000010;;300****;***id_privado***;10
 "@ | Out-File -Encoding UTF8 test.csv
 
 # Importa
@@ -668,7 +672,7 @@ curl -X POST -F "file=@test.csv" http://127.0.0.1:5000/students/import
 ```
 ✅ Edu Check - Entrada Registrada
 
-Test Prueba con cédula 1234567890 del grado 10
+Test Prueba con cédula ********** del grado 10
 registró su entrada a las 09:45.
 ```
 
@@ -677,10 +681,12 @@ registró su entrada a las 09:45.
 **Verificación 1: ¿Es el telegram_id correcto?**
 
 ```bash
-mysql -u root -pMilgause-59 edu_check -e "SELECT documento, primer_nombre, telegram_id FROM students WHERE documento='1234567890';"
+mysql -u root -p tu_password edu_check -e "SELECT documento, primer_nombre, telegram_id FROM students WHERE documento='1000000001';"
 ```
 
-Debe mostrar: `telegram_id = 5936924064` (tu User ID real)
+⚠️ **NUNCA publiques tu contraseña - reemplaza con tu password real localmente**
+
+Debe mostrar: `telegram_id = xxxxxxxxx` (tu User ID privado)
 
 **Verificación 2: Revisar logs del backend:**
 
