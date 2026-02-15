@@ -1,0 +1,53 @@
+<div class="scanner-container">
+    <h1>Escaneo de Asistencia</h1>
+
+    <!-- Mensaje de estado -->
+    <div *ngIf="message" class="message" [ngClass]="messageType">
+        {{ message }}
+    </div>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="isInitializing" class="loading">
+        <p>🔄 Iniciando cámara...</p>
+    </div>
+
+    <!-- Scanner con video y canvas superpuesto -->
+    <div class="scanner-wrapper" *ngIf="hasPermission" [ngClass]="{
+           'scanner-success': messageType === 'success' && message,
+           'scanner-error': messageType === 'error' && message
+         }">
+        <video #video playsinline autoplay></video>
+        <canvas #canvas class="qr-canvas"></canvas>
+    </div>
+
+    <div *ngIf="!hasPermission && permissionDenied" class="no-permission">
+        <p>📷 Se necesita permiso para acceder a la cámara</p>
+        <p>Por favor, autoriza el acceso cuando el navegador lo solicite</p>
+        <button class="permission-btn" (click)="requestPermission()">
+            🔓 Solicitar Permiso de Cámara
+        </button>
+        <div class="help-text">
+            <p><strong>¿No funciona?</strong></p>
+            <p>1. Busca el icono 🎥 en la barra de direcciones</p>
+            <p>2. Haz clic y selecciona "Permitir"</p>
+            <p>3. Recarga la página (F5)</p>
+        </div>
+    </div>
+
+    <!-- Selector de cámara (si hay múltiples) -->
+    <div *ngIf="availableDevices.length > 1 && hasPermission" class="camera-selector">
+        <label for="camera-select">Cámara:</label>
+        <select id="camera-select" [value]="currentDeviceId" (change)="onCameraChange($event)">
+            <option *ngFor="let device of availableDevices" [value]="device.deviceId">
+                {{ device.label || 'Cámara ' + (availableDevices.indexOf(device) + 1) }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Información -->
+    <div *ngIf="hasPermission" class="instructions">
+        <p>📱 El marco verde seguirá automáticamente el código QR</p>
+        <p>Funciona en cualquier ángulo o posición</p>
+        <p>El registro es automático al detectarlo</p>
+    </div>
+</div>

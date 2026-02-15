@@ -1,0 +1,128 @@
+<div class="csv-import-container">
+    <h1>Importar Estudiantes</h1>
+
+    <!-- Botón descargar plantilla -->
+    <div class="template-section">
+        <button class="btn-template" (click)="downloadTemplate()">
+            📥 Descargar Plantilla CSV
+        </button>
+        <p class="template-hint">
+            📊 Plantilla con 11 columnas: número, primer apellido, segundo apellido, primer nombre, segundo nombre, tipo
+            doc, documento, correo, teléfono, telegram, grado<br>
+            ✏️ Solo agrega los datos de tus estudiantes<br>
+            💾 Guarda y súbela aquí cuando termines
+        </p>
+    </div>
+
+    <!-- Mensajes -->
+    <div *ngIf="errorMessage" class="message error">
+        <span>❌</span> {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="message success">
+        <span>✓</span> {{ successMessage }}
+    </div>
+
+    <!-- Resultado de importación -->
+    <div *ngIf="uploadResult" class="result-summary">
+        <h3>Resultado de la Importación</h3>
+        <div class="result-stats">
+            <div class="stat created">
+                <span class="number">{{ uploadResult.creados }}</span>
+                <span class="label">Creados</span>
+            </div>
+            <div class="stat updated">
+                <span class="number">{{ uploadResult.actualizados }}</span>
+                <span class="label">Actualizados</span>
+            </div>
+            <div class="stat skipped">
+                <span class="number">{{ uploadResult.omitidos }}</span>
+                <span class="label">Omitidos</span>
+            </div>
+            <div class="stat errors">
+                <span class="number">{{ uploadResult.errores.length }}</span>
+                <span class="label">Errores</span>
+            </div>
+        </div>
+        <div *ngIf="uploadResult.grados.length > 0" class="grades-info">
+            <strong>Grados afectados:</strong> {{ uploadResult.grados.join(', ') }}
+        </div>
+        <div *ngIf="uploadResult.errores.length > 0" class="errors-list">
+            <h4>Errores encontrados:</h4>
+            <ul>
+                <li *ngFor="let error of uploadResult.errores">{{ error }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Área de drag & drop -->
+    <div class="upload-section">
+        <div class="drop-zone" [class.dragging]="isDragging" [class.has-file]="selectedFile"
+            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
+            (click)="fileInput.click()">
+
+            <div *ngIf="!selectedFile" class="drop-zone-content">
+                <div class="icon">📁</div>
+                <h3>Arrastra tu archivo CSV aquí</h3>
+                <p>o haz clic para seleccionar</p>
+                <p class="file-hint">Solo archivos .csv</p>
+            </div>
+
+            <div *ngIf="selectedFile" class="selected-file">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                    <div class="file-name">{{ selectedFile.name }}</div>
+                    <div class="file-size">{{ (selectedFile.size / 1024).toFixed(2) }} KB</div>
+                </div>
+            </div>
+
+            <input #fileInput type="file" accept=".csv" (change)="onFileSelected($event)" style="display: none;">
+        </div>
+
+        <div *ngIf="selectedFile" class="upload-actions">
+            <button class="btn-upload" (click)="uploadFile()" [disabled]="isUploading">
+                <span *ngIf="!isUploading">🚀 Importar Archivo</span>
+                <span *ngIf="isUploading">⏳ Importando...</span>
+            </button>
+            <button class="btn-cancel" (click)="cancelUpload()" [disabled]="isUploading">
+                ✖ Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- Historial de importaciones -->
+    <div class="history-section">
+        <h2>📊 Historial de Importaciones</h2>
+
+        <div *ngIf="uploadHistory.length === 0" class="no-history">
+            <p>No hay importaciones previas</p>
+        </div>
+
+        <div *ngIf="uploadHistory.length > 0" class="history-table-container">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Archivo</th>
+                        <th>Grados</th>
+                        <th>Creados</th>
+                        <th>Actualizados</th>
+                        <th>Omitidos</th>
+                        <th>Errores</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of uploadHistory">
+                        <td>{{ formatDate(item.fecha) }}</td>
+                        <td class="filename">{{ item.archivo }}</td>
+                        <td>{{ item.grados }}</td>
+                        <td class="stat-created">{{ item.creados }}</td>
+                        <td class="stat-updated">{{ item.actualizados }}</td>
+                        <td class="stat-skipped">{{ item.omitidos }}</td>
+                        <td class="stat-errors">{{ item.errores }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

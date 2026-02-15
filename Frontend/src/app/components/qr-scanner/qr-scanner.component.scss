@@ -1,0 +1,309 @@
+.scanner-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .message {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 16px;
+    animation: fadeIn 0.3s ease-in;
+
+    &.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    &.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  }
+
+  .loading {
+    background-color: #e7f3ff;
+    border: 2px solid #2196F3;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    margin: 20px auto;
+    max-width: 500px;
+
+    p {
+      font-size: 18px;
+      color: #1976D2;
+      font-weight: 500;
+      margin: 0;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  .scanner-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #000;
+    border: 4px solid transparent;
+    transition: all 0.3s ease;
+
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .qr-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    // Efecto neón verde para éxito
+    &.scanner-success {
+      border-color: #00ff00;
+      box-shadow: 
+        0 0 10px #00ff00,
+        0 0 20px #00ff00,
+        0 0 30px #00ff00,
+        0 0 40px #00ff00,
+        inset 0 0 10px rgba(0, 255, 0, 0.3);
+      animation: neonPulseGreen 1.5s ease-in-out;
+    }
+
+    // Efecto neón rojo para error
+    &.scanner-error {
+      border-color: #ff0000;
+      box-shadow: 
+        0 0 10px #ff0000,
+        0 0 20px #ff0000,
+        0 0 30px #ff0000,
+        0 0 40px #ff0000,
+        inset 0 0 10px rgba(255, 0, 0, 0.3);
+      animation: neonPulseRed 1.5s ease-in-out;
+    }
+  }
+
+  .no-permission {
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    padding: 60px 40px;
+    border-radius: 12px;
+    margin: 20px auto;
+    max-width: 500px;
+    
+    p {
+      margin: 15px 0;
+      
+      &:first-child {
+        font-size: 20px;
+        font-weight: bold;
+      }
+      
+      &:nth-child(2) {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 25px;
+      }
+    }
+
+    .permission-btn {
+      margin: 20px auto;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background-color: #28a745;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+
+      &:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .help-text {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      p {
+        margin: 8px 0;
+        font-size: 13px;
+
+        strong {
+          color: #ffc107;
+        }
+      }
+    }
+  }
+
+  .camera-selector {
+    text-align: center;
+    margin-bottom: 20px;
+
+    label {
+      display: inline-block;
+      margin-right: 10px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      min-width: 200px;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: #28a745;
+      }
+    }
+  }
+
+  .instructions {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+
+    p {
+      margin: 8px 0;
+      color: #666;
+      font-size: 14px;
+
+      &:first-child {
+        font-weight: 500;
+        color: #333;
+        font-size: 15px;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes neonPulseGreen {
+  0% {
+    box-shadow: 
+      0 0 5px #00ff00,
+      0 0 10px #00ff00,
+      0 0 15px #00ff00,
+      0 0 20px #00ff00,
+      inset 0 0 5px rgba(0, 255, 0, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px #00ff00,
+      0 0 30px #00ff00,
+      0 0 40px #00ff00,
+      0 0 50px #00ff00,
+      0 0 60px #00ff00,
+      inset 0 0 15px rgba(0, 255, 0, 0.5);
+  }
+  100% {
+    box-shadow: 
+      0 0 10px #00ff00,
+      0 0 20px #00ff00,
+      0 0 30px #00ff00,
+      0 0 40px #00ff00,
+      inset 0 0 10px rgba(0, 255, 0, 0.3);
+  }
+}
+
+@keyframes neonPulseRed {
+  0% {
+    box-shadow: 
+      0 0 5px #ff0000,
+      0 0 10px #ff0000,
+      0 0 15px #ff0000,
+      0 0 20px #ff0000,
+      inset 0 0 5px rgba(255, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px #ff0000,
+      0 0 30px #ff0000,
+      0 0 40px #ff0000,
+      0 0 50px #ff0000,
+      0 0 60px #ff0000,
+      inset 0 0 15px rgba(255, 0, 0, 0.5);
+  }
+  100% {
+    box-shadow: 
+      0 0 10px #ff0000,
+      0 0 20px #ff0000,
+      0 0 30px #ff0000,
+      0 0 40px #ff0000,
+      inset 0 0 10px rgba(255, 0, 0, 0.3);
+  }
+}
+
+@media (max-width: 600px) {
+  .scanner-container {
+    padding: 10px;
+
+    h1 {
+      font-size: 24px;
+    }
+
+    .scanner-wrapper {
+      max-width: 100%;
+    }
+
+    .camera-selector select {
+      min-width: 150px;
+    }
+  }
+}

@@ -1,0 +1,91 @@
+<div class="students-container">
+    <h1>👥 Gestión de Estudiantes</h1>
+
+    <!-- Buscador -->
+    <div class="search-section">
+        <div class="search-bar">
+            <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()"
+                placeholder="🔍 Buscar por nombre o documento..." class="search-input">
+            <button *ngIf="searchTerm" class="btn-clear" (click)="clearSearch()" title="Limpiar búsqueda">
+                ✖
+            </button>
+        </div>
+
+        <!-- Resultados de búsqueda -->
+        <div *ngIf="showSearchResults" class="search-results">
+            <div *ngIf="searchResults.length === 0" class="search-no-results">
+                No se encontraron estudiantes que coincidan con "{{ searchTerm }}"
+            </div>
+            <div *ngIf="searchResults.length > 0" class="results-list">
+                <div class="results-header">
+                    {{ searchResults.length }} resultado(s) encontrado(s)
+                </div>
+                <div class="results-grid">
+                    <div *ngFor="let student of searchResults" class="result-card">
+                        <div class="result-qr">
+                            <img [src]="getQrUrl(student.id)" [alt]="'QR ' + getFullName(student)" loading="lazy">
+                        </div>
+                        <div class="result-info">
+                            <div class="result-details">
+                                <span class="detail-item">📄 Doc: {{ student.documento }}</span>
+                                <span class="detail-item">🎓 Grado: {{ student.grado }}</span>
+                                <span class="detail-item">🔢 N°: {{ student.numero_estudiante }}</span>
+                                <span *ngIf="student.telegram_id" class="detail-item">📱 {{ student.telegram_id
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="message error">
+        <span>❌</span> {{ errorMessage }}
+    </div>
+
+    <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p>Cargando estudiantes...</p>
+    </div>
+
+    <div *ngIf="!isLoading && !showSearchResults && filteredGradeGroups.length > 0" class="grades-section">
+        <div *ngFor="let grade of filteredGradeGroups" class="grade-group">
+            <div class="grade-header" (click)="toggleGrade(grade)">
+                <div class="grade-info">
+                    <span class="grade-number">Grado {{ grade.grado }}</span>
+                    <span class="student-count">{{ grade.estudiantes.length }} estudiantes</span>
+                </div>
+                <div class="grade-actions">
+                    <button class="btn-print" (click)="printGrade(grade); $event.stopPropagation()"
+                        title="Imprimir QRs del grado">
+                        🖨️ Imprimir QRs
+                    </button>
+                    <span class="expand-icon" [class.expanded]="grade.expanded">▼</span>
+                </div>
+            </div>
+
+            <div class="grade-content" [class.expanded]="grade.expanded" [id]="'grade-' + grade.grado">
+                <div class="qr-grid">
+                    <div *ngFor="let student of grade.estudiantes" class="qr-card">
+                        <div class="qr-image">
+                            <img [src]="getQrUrl(student.id)" [alt]="'QR ' + getFullName(student)" loading="lazy">
+                        </div>
+                        <div class="student-details">
+                            <div class="student-doc">Doc: {{ student.documento }}</div>
+                            <div class="student-number">N° {{ student.numero_estudiante }}</div>
+                            <div class="student-telegram" *ngIf="student.telegram_id">
+                                📱 Telegram: {{ student.telegram_id }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="!isLoading && gradeGroups.length === 0 && !searchTerm" class="no-students">
+        <p>📚 No hay estudiantes registrados</p>
+        <p>Importa estudiantes usando el módulo de importación CSV</p>
+    </div>
+</div>
