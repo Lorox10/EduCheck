@@ -44,6 +44,7 @@ Edu Check es un sistema automatizado que permite a los colegios:
 - APScheduler (tareas programadas)
 - Telegram Bot API (notificaciones)
 - QRCode + Pillow (generación de QR con nombres)
+- ReportLab (generación de PDFs para reportes mensuales)
 
 ### Frontend
 
@@ -108,6 +109,14 @@ Instala lo siguiente en tu máquina:
     ```bash
     pip install -r Backend/requirements.txt
     ```
+
+    Esto instalará todas las dependencias necesarias incluyendo:
+    - Flask (framework web)
+    - SQLAlchemy (ORM para MySQL)
+    - APScheduler (tareas programadas)
+    - ReportLab (generación de PDFs)
+    - python-telegram-bot (notificaciones)
+    - y más...
 
 5. **Configura las variables de entorno:**
 
@@ -738,7 +747,7 @@ El sistema cuenta con un dashboard interactivo en tiempo real que muestra:
 - **Estadísticas de hoy:** Total de estudiantes, presentes, ausentes y porcentaje de asistencia
 - **Filtrado por grado:** Visualiza estadísticas específicas de cada grado
 - **Gráficos visuales:** Barras y gráficos circulares con distribución de asistencia
-- **Acciones rápidas:** 
+- **Acciones rápidas:**
   - Escanear más QR desde el dashboard
   - Ver reportes detallados
   - Descargar información en PDF
